@@ -79,7 +79,7 @@ section('Lock Controller', (section) => {
 
 
 
-    section.test('Let a lock timeout', async() => {
+    section.test('Let a lock time out', async() => {
         section.setTimeout(3000);
 
         const service = new Service({
