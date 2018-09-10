@@ -1,8 +1,10 @@
 # RDA Lock Service
 
-Provides a central place for locking resources for RDA. Is mainly consumed by the cluster service
-when updating the cluster with new data or when adding or removing nodes in order to prevent 
-parallel execution of such actions.
+Provides a central place for locking resources for RDA. Is mainly consumed by 
+the cluster service when updating the cluster with new data or when adding or 
+removing nodes in order to prevent parallel execution of such actions.
+
+Please use the lock [client](https://www.npmjs.com/package/@infect/rda-lock-client) for interactions with this service!
 
 
 ## API
