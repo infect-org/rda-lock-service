@@ -1,7 +1,7 @@
 import section from 'section-tests';
 import superagent from 'superagent';
 import assert from 'assert';
-import { ServiceManager } from 'rda-service';
+import ServiceManager from '@infect/rda-service-manager';
 import Service from '../index.mjs';
 
 

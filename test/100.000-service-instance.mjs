@@ -1,5 +1,5 @@
 import section from 'section-tests';
-import { ServiceManager } from 'rda-service';
+import ServiceManager from '@infect/rda-service-manager';
 import Service from '../index.mjs';
 
 
