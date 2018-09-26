@@ -44,16 +44,17 @@ export default class LockController extends Controller {
      * try to create a new lock for a given resource, returns a 200 OK it it could allocate the
      * lock, else 409 conflict if the lock is already taken.
      *
-     * @param      {Express.Request}   request   The request
-     * @param      {Express.Response}  response  The response
+     * @param      {HTTP2Request}   request   The request
      * @return     {Promise}           response data
      */
-    async create(request, response) {
-        assert(request.body && typeof request.body === 'object', 'Missing request body Expected an object containing an identifier and a TTL');
-        assert(typeof request.body.identifier === 'string' && request.body.identifier, 'Missing string identifier in request body');
-        assert(typeof request.body.ttl === 'number' && request.body.ttl > 0, 'Missing number ttl in request body');
+    async create(request) {
+        const data = await request.getData();
 
-        const { identifier, ttl } = request.body;
+        assert(typeof data === 'object', 'Missing request body Expected an object containing an identifier and a TTL');
+        assert(typeof data.identifier === 'string' && data.identifier, 'Missing string identifier in request body');
+        assert(typeof data.ttl === 'number' && data.ttl > 0, 'Missing number ttl in request body');
+
+        const { identifier, ttl } = data;
 
         // try to create the lock, if it fails with an unique
         // constraint error the lock is already in use
@@ -62,7 +63,7 @@ export default class LockController extends Controller {
             ttl,
         }).save().catch((err) => {
             if (err.code === 'uniqueDuplicateKey') {
-                response.status(409).send(`The lock ${identifier} is already in use!`);
+                request.response().status(409).send(`The lock ${identifier} is already in use!`);
             } else throw err;
         });
     }
@@ -73,23 +74,23 @@ export default class LockController extends Controller {
     /**
      * free an existing lock which requires the correct lock id
      *
-     * @param      {Express.Request}   request   The request
-     * @param      {Express.Response}  response  The response
+     * @param      {HTTP2Request}   request   The request
      * @return     {Promise}           response data
      */
-    async delete(request, response) {
-        assert(!(/[^0-9]/.test(request.params.id)), 'Invalid parameter id, expected a number!');
+    async delete(request) {
+        const id = request.getParameter('id');
+        assert(!(/[^0-9]/.test(id)), 'Invalid parameter id, expected a number!');
 
         // try to create the lock, if it fails with an unique
         // constraint error the lock is already in use
         const lock = await this.db.lock('*', {
-            id: Number.parseInt(request.params.id, 10),
+            id: Number.parseInt(id, 10),
         }).findOne();
 
         if (lock) {
             return lock.delete();
         } else {
-            response.status(404).send(`Could not free lock with id ${request.params.id}, the lock could not be found!`);
+            request.response().status(404).send(`Could not free lock with id ${id}, the lock could not be found!`);
         }
     }
 

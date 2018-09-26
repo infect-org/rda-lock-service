@@ -1,5 +1,5 @@
 import section from 'section-tests';
-import superagent from 'superagent';
+import HTTP2Client from '@distributed-systems/http2-client';
 import assert from 'assert';
 import ServiceManager from '@infect/rda-service-manager';
 import Service from '../index.mjs';
@@ -28,33 +28,42 @@ section('Lock Controller', (section) => {
 
     section.test('Create a lock', async() => {
         const service = new Service();
+        const client = new HTTP2Client();
         await service.load();
 
-        const lockResponse = await superagent.post(`${host}:${service.getPort()}/rda-lock.lock`).ok(res => res.status === 201).send({
-            identifier: lockIdentifier,
-            ttl: 60,
-        });
+        const lockResponse = await client.post(`${host}:${service.getPort()}/rda-lock.lock`)
+            .expect(201)
+            .send({
+                identifier: lockIdentifier,
+                ttl: 60,
+            });
 
-        assert(lockResponse.body);
-        assert(lockResponse.body.identifier);
-        assert.equal(lockResponse.body.identifier, lockIdentifier);
+        const data = await lockResponse.getData();
 
-        lockId = lockResponse.body.id;
+        assert(data);
+        assert(data.identifier);
+        assert.equal(data.identifier, lockIdentifier);
+
+        lockId = data.id;
 
         await section.wait(200);
         await service.end();
+        await client.end();
     });
 
 
 
     section.test('Create the same lock again', async() => {
         const service = new Service();
+        const client = new HTTP2Client();
         await service.load();
 
-        await superagent.post(`${host}:${service.getPort()}/rda-lock.lock`).ok(res => res.status === 409).send({
-            identifier: lockIdentifier,
-            ttl: 60,
-        });
+        await client.post(`${host}:${service.getPort()}/rda-lock.lock`)
+            .expect(409)
+            .send({
+                identifier: lockIdentifier,
+                ttl: 60,
+            });
 
         await section.wait(200);
         await service.end();
@@ -64,17 +73,23 @@ section('Lock Controller', (section) => {
 
     section.test('Free the lock', async() => {
         const service = new Service();
+        const client = new HTTP2Client();
         await service.load();
 
-        const lockResponse = await superagent.delete(`${host}:${service.getPort()}/rda-lock.lock/${lockId}`).ok(res => res.status === 200).send();
+        const lockResponse = await client.delete(`${host}:${service.getPort()}/rda-lock.lock/${lockId}`)
+            .expect(200)
+            .send();
 
-        assert(lockResponse.body);
-        assert(lockResponse.body.identifier);
-        assert.equal(lockResponse.body.identifier, lockIdentifier);
-        assert(lockResponse.body.deleted);
+        const data = await lockResponse.getData();
+
+        assert(data);
+        assert(data.identifier);
+        assert.equal(data.identifier, lockIdentifier);
+        assert(data.deleted);
 
         await section.wait(200);
         await service.end();
+        await client.end();
     });
 
 
@@ -82,21 +97,29 @@ section('Lock Controller', (section) => {
     section.test('Let a lock time out', async() => {
         section.setTimeout(3000);
 
+        const client = new HTTP2Client();
         const service = new Service({
             stallLockTestInterval: 1000,
         });
         await service.load();
 
-        const lockCreateResponse = await superagent.post(`${host}:${service.getPort()}/rda-lock.lock`).ok(res => res.status === 201).send({
-            identifier: lockIdentifier,
-            ttl: 1,
-        });
+        const lockCreateResponse = await client.post(`${host}:${service.getPort()}/rda-lock.lock`)
+            .expect(201).send({
+                identifier: lockIdentifier,
+                ttl: 1,
+            });
+
+        const data = await lockCreateResponse.getData();
+
 
         await section.wait(2000);
-        await superagent.delete(`${host}:${service.getPort()}/rda-lock.lock/${lockCreateResponse.body.id}`).ok(res => res.status === 404).send();
+        await client.delete(`${host}:${service.getPort()}/rda-lock.lock/${data.id}`)
+            .expect(404)
+            .send();
 
         await section.wait(200);
         await service.end();
+        await client.end();
     });
 
 
