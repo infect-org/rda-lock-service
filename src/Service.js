@@ -1,10 +1,13 @@
-import RDAService from 'rda-service';
+import RDAService from '@infect/rda-service';
 import Related from 'related';
 import RelatedTimestamps from 'related-timestamps';
 import log from 'ee-log';
+import path from 'path';
 
-import LockController from './controller/LockController.mjs';
+import LockController from './controller/LockController.js';
 
+
+const appRoot = path.join(path.dirname(new URL(import.meta.url).pathname), '../');
 
 
 /**
@@ -24,7 +27,10 @@ export default class LockService extends RDAService {
     constructor({
         stallLockTestInterval,
     } = {}) {
-        super('rda-lock');
+        super({
+            name: 'rda-lock',
+            appRoot,
+        });
 
         this.stallLockTestInterval = stallLockTestInterval;
     }
@@ -42,13 +48,14 @@ export default class LockService extends RDAService {
      * @return     {Promise}    undefined
      */
     async load() {
+        await this.initialize();
 
         // set up the database, enable soft deletes
-        this.related = new Related(this.config.db);
+        this.related = new Related(this.config.get('database'));
         this.related.use(new RelatedTimestamps());
 
         await this.related.load();
-        this.db = this.related[this.config.db.schema];
+        this.db = this.related[this.config.get('database').schema];
 
         const lockController = new LockController({
             db: this.db,

@@ -1,4 +1,4 @@
-import { Controller } from 'rda-service';
+import { Controller } from '@infect/rda-service';
 import log from 'ee-log';
 import assert from 'assert';
 

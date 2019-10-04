@@ -2,7 +2,7 @@ import section from 'section-tests';
 import HTTP2Client from '@distributed-systems/http2-client';
 import assert from 'assert';
 import ServiceManager from '@infect/rda-service-manager';
-import Service from '../index.mjs';
+import Service from '../index.js';
 
 
 
@@ -18,7 +18,7 @@ section('Lock Controller', (section) => {
 
     section.setup(async() => {
         sm = new ServiceManager({
-            args: '--dev --log-level=error+ --log-module=*'.split(' '),
+            args: '--dev.testing --log-level=error+ --log-module=*'.split(' '),
         });
 
         await sm.startServices('rda-service-registry');
