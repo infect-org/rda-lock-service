@@ -35,6 +35,30 @@ export default class LockController extends Controller {
 
         this.enableAction('create');
         this.enableAction('delete');
+        this.enableAction('listOne');
+    }
+
+
+
+
+    /**
+     * returns one lock, if available
+     *
+     * @param      {<type>}   request  The request
+     * @return     {Promise}  { description_of_the_return_value }
+     */
+    async listOne(request) {
+        const identifier = request.getParameter('id');
+
+        const lock = await this.db.lock('*', {
+            identifier,
+        }).raw().findOne();
+
+        if (lock) {
+            return lock;
+        } else {
+            await request.response().status(404).send();
+        }
     }
 
 

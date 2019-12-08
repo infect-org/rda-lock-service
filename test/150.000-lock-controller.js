@@ -71,6 +71,35 @@ section('Lock Controller', (section) => {
 
 
 
+    section.test('list a lock', async() => {
+        const service = new Service();
+        const client = new HTTP2Client();
+        await service.load();
+
+        const lockId = `lock-${Math.random()}`;
+
+        await client.post(`${host}:${service.getPort()}/rda-lock.lock`)
+            .expect(201)
+            .send({
+                identifier: lockId,
+                ttl: 60,
+            });
+
+        await client.get(`${host}:${service.getPort()}/rda-lock.lock/${lockId}`)
+            .expect(200)
+            .send();
+
+         await client.get(`${host}:${service.getPort()}/rda-lock.lock/a`)
+            .expect(404)
+            .send();
+
+        await section.wait(200);
+        await service.end();
+    });
+
+
+
+
     section.test('Free the lock', async() => {
         const service = new Service();
         const client = new HTTP2Client();
