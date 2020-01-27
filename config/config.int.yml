@@ -3,8 +3,8 @@ database:
     database: infect
     schema: rda_lock_service
     hosts:
-        - host: ${SERVICE_REGISTRY_DB_HOST}
-          username: postgres
+        - host: ${LOCK_SERVICE_DB_HOST}
+          username: ${LOCK_SERVICE_DB_USER}
           password: ${LOCK_SERVICE_DB_PASSWORD}
           port: 5432
           pools:
