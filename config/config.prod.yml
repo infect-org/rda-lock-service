@@ -1,6 +1,6 @@
 database:
     type: postgres
-    database: rda
+    database: ${LOCK_SERVICE_DB_NAME}
     schema: rda_lock_service
     hosts:
         - host: ${LOCK_SERVICE_DB_HOST}
