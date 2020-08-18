@@ -1,6 +1,6 @@
 {
   "name": "@infect/rda-lock-service",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "RDA Lock Management Service",
   "main": "index.mjs",
   "directories": {
