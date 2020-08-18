@@ -26,7 +26,7 @@
   "devDependencies": {
     "@distributed-systems/eslint-config": "^1.0.2",
     "@distributed-systems/http2-client": "^2.1.0",
-    "@infect/rda-service-manager": "^2.0.4",
+    "@infect/rda-service-manager": "^2.1.0",
     "rda-fixtures": "^1.1.0",
     "section-tests": "^2.2.4"
   },
